@@ -238,7 +238,7 @@ class User:
             )
             self.alert_message = None
 
-    def stop_checkin(self):
+    def stop_checkins(self):
         """End the session for a user."""
         self.delete_scheduled()
         self.channel = None
