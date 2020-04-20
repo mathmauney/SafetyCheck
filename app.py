@@ -15,8 +15,8 @@ import pytz
 import threading
 
 # Some default variables
-default_alert_time = 5
-default_reminder_time = 2
+default_alert_time = 60
+default_reminder_time = 30
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
