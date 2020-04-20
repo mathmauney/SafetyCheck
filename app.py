@@ -203,7 +203,7 @@ class User:
             return
         try:
             self.delete_scheduled()
-        except errors.SlackAPIError:
+        except errors.slackApiError:
             print("Unable to delete scheduled.")
         now = int(time.time())
         reminder_time = now + 60*self.reminder_time
@@ -246,7 +246,7 @@ class User:
         """End the session for a user."""
         try:
             self.delete_scheduled()
-        except errors.SlackAPIError:
+        except errors.slackApiError:
             print("Unable to delete scheduled.")
         self.channel = None
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
