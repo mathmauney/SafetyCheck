@@ -202,7 +202,11 @@ class User:
     @property
     def last_update(self):
         """Last message/emoji from user to prevent duplications."""
-        return self._get('last_update')
+        out = self._get('last_update')
+        if out is None:
+            return 0
+        else:
+            return out
 
     @last_update.setter
     def last_update(self, new_time):
