@@ -205,20 +205,20 @@ class User:
         reminder_time = now + 60*self.reminder_time
         alert_time = now + 60*self.alert_time
         response = slack_web_client.chat_scheduleMessage(
-            channel=self.pms,
+            channel=str(self.pms),
             text=f"Hey, you still there?",
             post_at=str(reminder_time)
         )
         self.reminder_message = response['scheduled_message_id']
         response = slack_web_client.chat_scheduleMessage(
-            channel=self.channel,
+            channel=str(self.channel),
             text=f"Hey <!everyone>, {self.name} didn't check-in, can someone call him?",
             post_at=str(alert_time)
         )
         self.alert_message = response['scheduled_message_id']
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
         slack_web_client.chat_update(
-            channel=self.channel,
+            channel=str(self.channel),
             ts=str(self.status_message),
             text=f"Welcome {self.name}! I'll start checking in on you now, stay safe! Last checked in at: {checkin_time}"
         )
@@ -227,14 +227,14 @@ class User:
         """Delete all the scheduled checkin messages for this user."""
         if self.reminder_message is not None:
             slack_web_client.chat_deleteScheduledMessage(
-                channel=self.pms,
-                scheduled_message_id=self.reminder_message
+                channel=str(self.pms),
+                scheduled_message_id=str(self.reminder_message)
             )
             self.reminder_messgae = None
         if self.alert_message is not None:
             slack_web_client.chat_deleteScheduledMessage(
-                channel=self.channel,
-                scheduled_message_id=self.alert_message
+                channel=str(self.channel),
+                scheduled_message_id=str(self.alert_message)
             )
             self.alert_message = None
 
@@ -244,7 +244,7 @@ class User:
         self.channel = None
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
         slack_web_client.chat_update(
-            channel=self.channel,
+            channel=str(self.channel),
             ts=str(self.status_message),
             text=f"{self.name.title()} checked out at: {checkin_time}"
         )
