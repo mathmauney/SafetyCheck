@@ -88,7 +88,7 @@ class User:
         if tz is not None:
             return tz
         else:
-            response = slack_web_client.users_info(self.id)
+            response = slack_web_client.users_info(user=self.id)
             if response['ok']:
                 new_tz = response['user']['tz']
                 self._set('tz', pytz.timezone(new_tz))
@@ -178,7 +178,7 @@ class User:
     @property
     def name(self):
         """Query slack for the users name."""
-        response = slack_web_client.users_info(self.id)
+        response = slack_web_client.users_info(user=self.id)
         if response['ok']:
             return response['user']['name']
         else:
