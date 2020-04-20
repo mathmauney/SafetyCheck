@@ -33,8 +33,14 @@ def message(payload):
     channel_id = event.get("channel")
     user_id = event.get("user")
     text = event.get("text")
+    ts = event.get("ts")
 
     user = User(user_id)
+
+    if int(ts) < user.last_update:
+        return
+    else:
+        user.last_update = int(ts)
 
     if text and text.lower().startswith("start"):
         user.start_checkins(channel_id)
@@ -52,8 +58,16 @@ def update_emoji(payload):
     """Process an emoji update event."""
     event = payload.get("event", {})
     user_id = event.get("user")
+    ts = event.get("event_ts")
 
     user = User(user_id)
+
+    if int(ts) < user.last_update:
+        return
+    else:
+        user.last_update = int(ts)
+
+
     user.checkin()
 
 
@@ -185,6 +199,15 @@ class User:
             return response['user']['name']
         else:
             raise ValueError('Unable to get user name.')
+
+    @property
+    def last_update(self):
+        """Last message/emoji from user to prevent duplications."""
+        return self._get('last_update')
+
+    @last_update.setter
+    def last_update(self, new_time):
+        self._set('last_update', new_time)
 
     # ===== Define checkin functions =====
     def start_checkins(self, channel_id):
