@@ -101,6 +101,7 @@ def im_message(payload):
 
     user.checkin()
 
+
 # ============= Classes ============= #
 class User:
     """Defines a user class that will interface with the database backend."""
@@ -258,10 +259,7 @@ class User:
         """Update that a user has been seen."""
         if self.channel is None:
             return
-        try:
-            self.delete_scheduled()
-        except errors.SlackApiError:
-            print("Unable to delete scheduled.")
+        self.delete_scheduled()
         now = int(time.time())
         reminder_time = now + 60*self.reminder_time
         alert_time = now + 60*self.alert_time
@@ -287,24 +285,27 @@ class User:
     def delete_scheduled(self):
         """Delete all the scheduled checkin messages for this user."""
         if self.reminder_message is not None:
-            slack_web_client.chat_deleteScheduledMessage(
-                channel=str(self.pms),
-                scheduled_message_id=str(self.reminder_message)
-            )
+            try:
+                slack_web_client.chat_deleteScheduledMessage(
+                    channel=str(self.pms),
+                    scheduled_message_id=str(self.reminder_message)
+                )
+            except errors.SlackApiError:
+                print("Could not delete reminder.")
             self.reminder_messgae = None
         if self.alert_message is not None:
-            slack_web_client.chat_deleteScheduledMessage(
-                channel=str(self.channel),
-                scheduled_message_id=str(self.alert_message)
-            )
+            try:
+                slack_web_client.chat_deleteScheduledMessage(
+                    channel=str(self.channel),
+                    scheduled_message_id=str(self.alert_message)
+                )
+            except errors.SlackApiError:
+                print("Could not delete alert.")
             self.alert_message = None
 
     def stop_checkins(self):
         """End the session for a user."""
-        try:
-            self.delete_scheduled()
-        except errors.SlackApiError:
-            print("Unable to delete scheduled.")
+        self.delete_scheduled()
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
         slack_web_client.chat_update(
             channel=str(self.channel),
