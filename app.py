@@ -5,6 +5,7 @@ import time
 import logging
 from flask import Flask
 from slack import WebClient
+from slack import errors
 from slackeventsapi import SlackEventAdapter
 import ssl as ssl_lib
 import certifi
@@ -200,7 +201,10 @@ class User:
         """Update that a user has been seen."""
         if self.channel is None:
             return
-        self.delete_scheduled()
+        try:
+            self.delete_scheduled()
+        except errors.SlackAPIError:
+            print("Unable to delete scheduled.")
         now = int(time.time())
         reminder_time = now + 60*self.reminder_time
         alert_time = now + 60*self.alert_time
@@ -240,7 +244,10 @@ class User:
 
     def stop_checkins(self):
         """End the session for a user."""
-        self.delete_scheduled()
+        try:
+            self.delete_scheduled()
+        except errors.SlackAPIError:
+            print("Unable to delete scheduled.")
         self.channel = None
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
         slack_web_client.chat_update(
