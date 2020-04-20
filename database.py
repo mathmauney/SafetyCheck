@@ -1,12 +1,12 @@
 """Robowillow database operations in pymongo."""
 import pymongo
+from config import dbpassword
 
-host = "mongodb://localhost:27017/"
-my_client = pymongo.MongoClient(host)
-main_db = my_client['safety']
+client = pymongo.MongoClient(f"mongodb+srv://dbUser:{dbpassword}@cluster0-yfftj.gcp.mongodb.net/test?retryWrites=true&w=majority")
+main_db = client.test
+# main_db = my_client['safety']
 users = main_db['users']
 settings = main_db['settings']    # No settings yet, keeping this in case I need it.
-
 
 
 def add_user(user_id):
