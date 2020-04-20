@@ -12,6 +12,7 @@ import certifi
 import database as db
 import datetime
 import pytz
+import threading
 
 # Some default variables
 default_alert_time = 5
@@ -44,8 +45,12 @@ def message(payload):
         user.last_update = float(ts)
 
     if text and text.lower().startswith("start"):
-        user.start_checkins(channel_id)
+        x = threading.Thread(target=user.start_checkins, args=(channel_id,), daemon=True)
+        x.start()
+        # user.start_checkins(channel_id)
     elif text and text.lower().startswith("stop"):
+        x = threading.Thread(target=user.stop_checkins, daemon=True)
+        x.start()
         user.stop_checkins()
     elif text and text.lower().startswith("clear"):
         oldest = int(time.time()) + 60
