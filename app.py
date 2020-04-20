@@ -34,12 +34,13 @@ def message(payload):
     text = event.get("text")
 
     user = User(user_id)
-    user.checkin()
 
     if text and text.lower().startswith("start"):
         user.start_checkins(channel_id)
     elif text and text.lower().startswith("stop"):
         user.stop_checkins()
+    else:
+        user.checkin()
 
 # ============= Reaction Added Events ============= #
 # When monitored user adds an emoji reaction to a message,
