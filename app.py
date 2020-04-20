@@ -25,6 +25,7 @@ slack_events_adapter = SlackEventAdapter(os.environ['SLACK_SIGNING_SECRET'], "/s
 slack_web_client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 # ============== Slack Events ============= #
+# Message event
 @slack_events_adapter.on("message")
 def message(payload):
     """Process a message event."""
@@ -62,10 +63,7 @@ def message(payload):
     else:
         user.checkin()
 
-# ============= Reaction Added Events ============= #
-# When monitored user adds an emoji reaction to a message,
-# the type of the event will be 'reaction_added'.
-# Here we'll link the update_emoji callback to the 'reaction_added' event.
+# Reaction Added Event#
 @slack_events_adapter.on("reaction_added")
 def update_emoji(payload):
     """Process an emoji update event."""
@@ -82,6 +80,21 @@ def update_emoji(payload):
 
     user.checkin()
 
+# Direct Message event_ts
+@slack_events_adapter.on("message.im")
+def im_message(payload):
+    """Process a direct message."""
+    event = payload.get("event", {})
+    user_id = event.get("user")
+    ts = event.get("ts")
+    user = User(user_id)
+
+    if float(ts) < user.last_update:
+        return
+    else:
+        user.last_update = float(ts)
+
+    user.checkin()
 
 # ============= Classes ============= #
 class User:
