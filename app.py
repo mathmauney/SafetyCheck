@@ -78,6 +78,7 @@ class User:
         """Set a value in the database for this user."""
         update_dict = {'$set': {property_name: value}}
         db.users.update_one(self.find_dict, update_dict)
+        print(f'Trying to update {property_name}')
 
     # ===== Define class properties to pull from database =====
     @property
