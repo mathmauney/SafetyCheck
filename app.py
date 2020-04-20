@@ -37,10 +37,10 @@ def message(payload):
 
     user = User(user_id)
 
-    if int(ts) < user.last_update:
+    if float(ts) < user.last_update:
         return
     else:
-        user.last_update = int(ts)
+        user.last_update = float(ts)
 
     if text and text.lower().startswith("start"):
         user.start_checkins(channel_id)
@@ -62,11 +62,10 @@ def update_emoji(payload):
 
     user = User(user_id)
 
-    if int(ts) < user.last_update:
+    if float(ts) < user.last_update:
         return
     else:
-        user.last_update = int(ts)
-
+        user.last_update = float(ts)
 
     user.checkin()
 
