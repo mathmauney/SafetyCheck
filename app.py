@@ -105,6 +105,24 @@ def im_message(payload):
     user.checkin()
 
 
+# Direct Message event_ts
+@slack_events_adapter.on("message.mpim")
+def mpim_message(payload):
+    """Process a direct message."""
+    print("Got a direct message event")
+    event = payload.get("event", {})
+    user_id = event.get("user")
+    ts = event.get("ts")
+    user = User(user_id)
+
+    if float(ts) < user.last_update:
+        return
+    else:
+        user.last_update = float(ts)
+
+    user.checkin()
+
+
 # ============= Classes ============= #
 class User:
     """Defines a user class that will interface with the database backend."""
