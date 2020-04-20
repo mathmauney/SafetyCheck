@@ -14,8 +14,8 @@ import datetime
 import pytz
 
 # Some default variables
-default_alert_time = 60
-default_reminder_time = 30
+default_alert_time = 5
+default_reminder_time = 2
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
@@ -242,7 +242,7 @@ class User:
         self.reminder_message = response['scheduled_message_id']
         response = slack_web_client.chat_scheduleMessage(
             channel=str(self.channel),
-            text=f"Hey <!everyone>, {self.name} didn't check-in, can someone call him?",
+            text=f"Hey <!channel>, {self.name} didn't check-in, can someone call him?",
             post_at=str(alert_time)
         )
         self.alert_message = response['scheduled_message_id']
