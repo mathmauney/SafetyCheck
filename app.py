@@ -51,7 +51,7 @@ def message(payload):
     elif text and text.lower().startswith("stop"):
         x = threading.Thread(target=user.stop_checkins, daemon=True)
         x.start()
-        user.stop_checkins()
+        # user.stop_checkins()
     elif text and text.lower().startswith("clear"):
         oldest = int(time.time()) + 60
         latest = oldest + 60*60*12
