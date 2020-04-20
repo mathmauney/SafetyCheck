@@ -187,10 +187,7 @@ class User:
     # ===== Define checkin functions =====
     def start_checkins(self, channel_id):
         """Start checkins for the user in a given channel."""
-        if self.channel is not None:
-            raise ValueError('User is already checked in')
         self.channel = channel_id
-
         response = slack_web_client.chat_postMessage(
             channel=channel_id,
             text=f"Welcome {self.name}! I'll start checking in on you now, stay safe!"
