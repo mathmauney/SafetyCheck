@@ -247,7 +247,7 @@ class User:
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
         slack_web_client.chat_update(
             channel=self.channel,
-            ts=self.status_message,
+            ts=str(self.status_message),
             text=f"{self.name.title()} checked out at: {checkin_time}"
         )
         self.tz = None
