@@ -46,6 +46,19 @@ def message(payload):
         user.start_checkins(channel_id)
     elif text and text.lower().startswith("stop"):
         user.stop_checkins()
+    elif text and text.lower().startswith("clear"):
+        oldest = int(time.time()) + 60
+        latest = oldest + 60*60*12
+        response = slack_web_client.chat_scheduledMessages_list(
+            channel=channel_id,
+            latest=str(latest),
+            oldest=str(oldest)
+            )
+        for message in response['scheduled_messages']:
+            response = slack_web_client.chat_deleteScheduledMessage(
+                channel=channel_id,
+                scheduled_message_id=message['id']
+            )
     else:
         user.checkin()
 
