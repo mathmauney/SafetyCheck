@@ -232,11 +232,13 @@ class User:
                 channel=self.pms,
                 scheduled_message_id=self.reminder_message
             )
+            self.reminder_messgae = None
         if self.alert_message is not None:
             slack_web_client.chat_deleteScheduledMessage(
                 channel=self.channel,
                 scheduled_message_id=self.alert_message
             )
+            self.alert_message = None
 
     def stop_checkin(self):
         """End the session for a user."""
@@ -249,6 +251,7 @@ class User:
             text=f"{self.name.title()} checked out at: {checkin_time}"
         )
         self.tz = None
+        self.status_message = None
 
 
 if __name__ == "__main__":
