@@ -5,3 +5,4 @@ certifi
 datetime
 pytz
 pymongo
+dnspython

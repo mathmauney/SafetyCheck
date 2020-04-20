@@ -70,13 +70,13 @@ class User:
     # ===== Define database interaction functions =====
     def _get(self, property_name):
         """Get a value from the database for this user."""
-        return_dict = {'_id': 0, property: 1}
+        return_dict = {'_id': 0, property_name: 1}
         db_result = db.users.find_one(self.find_dict, return_dict)
-        return db_result.get(property, None)
+        return db_result.get(property_name, None)
 
     def _set(self, property_name, value):
         """Set a value in the database for this user."""
-        update_dict = {'$set': {property: value}}
+        update_dict = {'$set': {property_name: value}}
         db.users.update_one(self.find_dict, update_dict)
 
     # ===== Define class properties to pull from database =====
