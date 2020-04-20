@@ -221,7 +221,7 @@ class User:
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
         slack_web_client.chat_update(
             channel=self.channel,
-            ts=self.status_message,
+            ts=str(self.status_message),
             text=f"Welcome {self.name}! I'll start checking in on you now, stay safe! Last checked in at: {checkin_time}"
         )
 
