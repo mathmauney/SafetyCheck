@@ -30,6 +30,7 @@ slack_web_client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 @slack_events_adapter.on("message")
 def message(payload):
     """Process a message event."""
+    print("Got a message event")
     event = payload.get("event", {})
 
     channel_id = event.get("channel")
@@ -72,6 +73,7 @@ def message(payload):
 @slack_events_adapter.on("reaction_added")
 def update_emoji(payload):
     """Process an emoji update event."""
+    print("Got an emoji added event")
     event = payload.get("event", {})
     user_id = event.get("user")
     ts = event.get("event_ts")
@@ -89,6 +91,7 @@ def update_emoji(payload):
 @slack_events_adapter.on("message.im")
 def im_message(payload):
     """Process a direct message."""
+    print("Got a direct message event")
     event = payload.get("event", {})
     user_id = event.get("user")
     ts = event.get("ts")
@@ -125,7 +128,6 @@ class User:
         """Set a value in the database for this user."""
         update_dict = {'$set': {property_name: value}}
         db.users.update_one(self.find_dict, update_dict)
-        print(f'Trying to update {property_name}')
 
     # ===== Define class properties to pull from database =====
     @property
