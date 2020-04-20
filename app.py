@@ -86,13 +86,13 @@ class User:
         """Get the users time zone."""
         tz = self._get('tz')
         if tz is not None:
-            return tz
+            return pytz.timezone(tz)
         else:
             response = slack_web_client.users_info(user=self.id)
             if response['ok']:
                 new_tz = response['user']['tz']
-                self._set('tz', pytz.timezone(new_tz))
-                return new_tz
+                self._set('tz', new_tz)
+                return pytz.timezone(new_tz)
             else:
                 raise ValueError('Unable to get user time zone.')
 
