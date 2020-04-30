@@ -274,6 +274,10 @@ class User:
         )
         self.status_message = response['ts']
         self.checkin()
+        slack_web_client.pins_add(
+            channel=str(channel_id),
+            timestamp=str(self.status_message)
+        )
 
     def checkin(self):
         """Update that a user has been seen."""
@@ -331,6 +335,10 @@ class User:
             channel=str(self.channel),
             ts=str(self.status_message),
             text=f"{self.name.title()} checked out at: {checkin_time}"
+        )
+        slack_web_client.pins_remove(
+            channel=str(self.channel),
+            timestamp=str(self.status_message)
         )
         self.channel = None
         self.tz = None
