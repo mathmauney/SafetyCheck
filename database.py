@@ -3,7 +3,7 @@ import pymongo
 import os
 
 dbpassword = os.environ['DBPASSWORD']
-client = pymongo.MongoClient(f"mongodb+srv://dbUser:{dbpassword}@cluster0-yfftj.gcp.mongodb.net/test?retryWrites=true&w=majority")
+client = pymongo.MongoClient(f"mongodb+srv://dbUser:{dbpassword}@cluster0-xr6ug.mongodb.net/test?retryWrites=true&w=majority")
 main_db = client.test
 # main_db = my_client['safety']
 users = main_db['users']
