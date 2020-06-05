@@ -27,7 +27,6 @@ default_reminder_time = 30
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
-slack_events_adapter = SlackEventAdapter(os.environ['SLACK_SIGNING_SECRET'], "/slack/events", app)
 
 # Initialize a Web API client
 slack_web_client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
@@ -97,6 +96,9 @@ def channel_exists():
 
 def create_channel():
     slack_web_client.conversations_create(name="safetycheck-channel")
+
+
+slack_events_adapter = SlackEventAdapter(os.environ['SLACK_SIGNING_SECRET'], "/slack/events", app)
 
 
 # ============== Slack Events ============= #
