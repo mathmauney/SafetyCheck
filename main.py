@@ -2,7 +2,7 @@
 import os
 import time
 import logging
-from flask import Flask
+from flask import Flask, request
 from slack import WebClient
 from slack import errors
 from slackeventsapi import SlackEventAdapter
