@@ -33,7 +33,6 @@ slack_web_client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 
 # Create a dictionary to represent a database to store our token
-token_database = db.tokens
 global_token = ""
 
 
@@ -66,7 +65,7 @@ def post_install():
     # Save the bot token and teamID to a database
     # In our example, we are saving it to dictionary to represent a DB
     teamID = response["team"]["id"]
-    token_database[teamID] = response["access_token"]
+    db.add_token(teamID, response["access_token"])
     # Also save the bot token in a global variable so we don't have to
     # do a database lookup on each WebClient call
     global global_token
