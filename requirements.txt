@@ -6,3 +6,4 @@ datetime
 pytz
 pymongo
 dnspython
+gunicorn==20.0.4
