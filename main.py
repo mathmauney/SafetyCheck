@@ -38,9 +38,6 @@ token_database = db.tokens
 global_token = ""
 
 
-app = Flask(__name__)
-
-
 # Route to kick off Oauth flow
 @app.route("/begin_auth", methods=["GET"])
 def pre_install():
@@ -100,8 +97,6 @@ def channel_exists():
 
 def create_channel():
     slack_web_client.conversations_create(name="safetycheck-channel")
-
-
 
 
 # ============== Slack Events ============= #
