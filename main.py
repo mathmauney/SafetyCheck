@@ -55,7 +55,7 @@ def post_install():
     received_state = request.args["state"]
 
     # Token is not required to call the oauth.v2.access method
-    client = slack.WebClient()
+    client = slack_web_client
 
     # verify state received in params matches state we originally sent in auth request
     if received_state == state:
