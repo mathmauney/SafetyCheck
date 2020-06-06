@@ -26,7 +26,7 @@ def add_token(teamID, token):
         tokens.insert_one(init_dict)
     elif entry['token'] != token:
         update_dict = {'$set': {'token': token}
-        token.update_one(entry, update_dict)
+        tokens.update_one(entry, update_dict)
 
 
 def get_token(teamID):
