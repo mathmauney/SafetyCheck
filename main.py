@@ -112,7 +112,7 @@ def message(payload):
     teamID = event.get("team_id")
     token = db.get_token(teamID)
     if token is None:
-        print("No token found")
+        print(f"No token found for {teamID}")
         return
 
     user = User(user_id, token)
