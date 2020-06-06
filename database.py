@@ -32,4 +32,7 @@ def add_token(teamID, token):
 def get_token(teamID):
     find_dict = {'teamID': teamID}
     entry = tokens.find_one(find_dict)
-    return entry['token']
+    if entry is not None:
+        return entry['token']
+    else:
+        return None
