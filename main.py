@@ -19,7 +19,7 @@ client_secret = os.environ["SLACK_CLIENT_SECRET"]
 signing_secret = os.environ["SLACK_SIGNING_SECRET"]
 
 state = str(uuid4())
-oauth_scope = ", ".join(['channels:read', 'channels:history', 'chat:write', 'groups:write', 'im:history', 'im:write', 'mpim:write', "reactions:read", 'users:read', 'im:read'])
+oauth_scope = ", ".join(['channels:manage', 'channels:read', 'channels:history', 'chat:write', 'groups:write', 'im:history', 'im:write', 'mpim:write', "reactions:read", 'users:read', 'im:read'])
 
 # Some default variables
 default_alert_time = 60
