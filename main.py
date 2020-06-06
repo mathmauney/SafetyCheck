@@ -41,20 +41,15 @@ def pre_install():
 def post_install():
     # Retrieve the auth code and state from the request params
     auth_code = request.args["code"]
-    received_state = request.args["state"]
 
     # Token is not required to call the oauth.v2.access method
     client = WebClient()
 
-    # verify state received in params matches state we originally sent in auth request
-    if received_state == state:
-        # Exchange the authorization code for an access token with Slack
-        response = client.oauth_v2_access(
-          client_id=client_id,
-          client_secret=client_secret,
-          code=auth_code)
-    else:
-        return "Invalid State"
+    # Exchange the authorization code for an access token with Slack
+    response = client.oauth_v2_access(
+      client_id=client_id,
+      client_secret=client_secret,
+      code=auth_code)
 
     # Save the bot token and teamID to a database
     # In our example, we are saving it to dictionary to represent a DB
