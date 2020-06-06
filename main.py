@@ -19,7 +19,7 @@ client_secret = os.environ["SLACK_CLIENT_SECRET"]
 signing_secret = os.environ["SLACK_SIGNING_SECRET"]
 
 state = str(uuid4())
-oauth_scope = ", ".join(['channels:manage', 'channels:read', 'channels:history', 'chat:write', 'groups:write', 'im:history', 'im:write', 'mpim:write', "reactions:read", 'users:read', 'im:read'])
+oauth_scope = ", ".join(['channels:join', 'channels:manage', 'channels:read', 'channels:history', 'chat:write', 'groups:write', 'im:history', 'im:write', 'mpim:write', "reactions:read", 'users:read', 'im:read'])
 
 # Some default variables
 default_alert_time = 60
@@ -91,8 +91,8 @@ def channel_exists():
 
 def create_channel():
     client = WebClient(token=global_token)
-    client.conversations_create(name="safetycheck-channel")
-
+    response = client.conversations_create(name="safetycheck-channel")
+    client.conversations_join(channel=response["channel"]["id"])
 
 slack_events_adapter = SlackEventAdapter(os.environ['SLACK_SIGNING_SECRET'], "/slack/events", app)
 
