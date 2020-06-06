@@ -109,7 +109,7 @@ def message(payload):
     user_id = event.get("user")
     text = event.get("text")
     ts = event.get("ts")
-    teamID = event['team']['id']
+    teamID = payload['team_id']
     token = db.get_token(teamID)
     if token is None:
         print(f"No token found for {teamID}")
@@ -161,7 +161,7 @@ def update_emoji(payload):
     event = payload.get("event", {})
     user_id = event.get("user")
     ts = event.get("event_ts")
-    teamID = event['team']['id']
+    teamID = payload['team_id']
     token = db.get_token(teamID)
 
     user = User(user_id, token)
