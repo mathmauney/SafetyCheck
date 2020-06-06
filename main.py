@@ -1,9 +1,8 @@
 """Slack app to perform safety checks and monitoring for people working alone."""
-
 import os
 import time
 import logging
-from flask import Flask
+from flask import Flask, request
 from slack import WebClient
 from slack import errors
 from slackeventsapi import SlackEventAdapter
@@ -13,6 +12,14 @@ import database as db
 import datetime
 import pytz
 import threading
+from uuid import uuid4
+
+client_id = os.environ["SLACK_CLIENT_ID"]
+client_secret = os.environ["SLACK_CLIENT_SECRET"]
+signing_secret = os.environ["SLACK_SIGNING_SECRET"]
+
+state = str(uuid4())
+oauth_scope = ", ".join(['channels:join', 'channels:manage', 'channels:read', 'channels:history', 'chat:write', 'groups:write', 'im:history', 'im:write', 'mpim:write', "reactions:read", 'users:read', 'im:read'])
 
 # Some default variables
 default_alert_time = 60
@@ -20,10 +27,70 @@ default_reminder_time = 30
 
 # Initialize a Flask app to host the events adapter
 app = Flask(__name__)
+
+global_token = ""
+
+# Route to kick off Oauth flow
+@app.route("/begin_auth", methods=["GET"])
+def pre_install():
+    return f'<a href="https://slack.com/oauth/v2/authorize?scope={ oauth_scope }&client_id={ client_id }&state={state}"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>'
+
+
+# Route for Oauth flow to redirect to after user accepts scopes
+@app.route("/finish_auth", methods=["GET", "POST"])
+def post_install():
+    # Retrieve the auth code and state from the request params
+    auth_code = request.args["code"]
+
+    # Token is not required to call the oauth.v2.access method
+    client = WebClient()
+
+    # Exchange the authorization code for an access token with Slack
+    response = client.oauth_v2_access(
+      client_id=client_id,
+      client_secret=client_secret,
+      code=auth_code)
+
+    # Save the bot token and teamID to a database
+    # In our example, we are saving it to dictionary to represent a DB
+    teamID = response["team"]["id"]
+    db.add_token(teamID, response["access_token"])
+    # Also save the bot token in a global variable so we don't have to
+    # do a database lookup on each WebClient call
+    global global_token
+    global_token = response["access_token"]
+    print(f"Added token for {teamID}")
+
+    # See if "the-welcome-channel" exists. Create it if it doesn't.
+    channel_exists()
+
+    # Don't forget to let the user know that auth has succeeded!
+    return "Auth complete!"
+
+
+# verifies if "the-welcome-channel" already exists
+def channel_exists():
+    client = WebClient(token=global_token)
+    # grab a list of all the channels in a workspace
+    clist = client.conversations_list()
+    exists = False
+    for k in clist["channels"]:
+        # look for the channel in the list of existing channels
+        if k["name"] == "safetycheck-channel":
+            exists = True
+            break
+    if exists is False:
+        # create the channel since it doesn't exist
+        create_channel()
+
+
+def create_channel():
+    client = WebClient(token=global_token)
+    response = client.conversations_create(name="safetycheck-channel")
+    client.conversations_join(channel=response["channel"]["id"])
+
 slack_events_adapter = SlackEventAdapter(os.environ['SLACK_SIGNING_SECRET'], "/slack/events", app)
 
-# Initialize a Web API client
-slack_web_client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 # ============== Slack Events ============= #
 # Message event
@@ -37,8 +104,13 @@ def message(payload):
     user_id = event.get("user")
     text = event.get("text")
     ts = event.get("ts")
+    teamID = payload['team_id']
+    token = db.get_token(teamID)
+    if token is None:
+        print(f"No token found for {teamID}")
+        return
 
-    user = User(user_id)
+    user = User(user_id, token)
 
     if float(ts) < user.last_update:
         return
@@ -54,18 +126,25 @@ def message(payload):
         x.start()
         # user.stop_checkins()
     elif text and text.lower().startswith("clear"):
+        client = WebClient(token)
         oldest = int(time.time()) + 60
         latest = oldest + 60*60*12
-        response = slack_web_client.chat_scheduledMessages_list(
+        response = client.chat_scheduledMessages_list(
             channel=channel_id,
             latest=str(latest),
             oldest=str(oldest)
             )
         for message in response['scheduled_messages']:
-            response = slack_web_client.chat_deleteScheduledMessage(
+            response = client.chat_deleteScheduledMessage(
                 channel=channel_id,
                 scheduled_message_id=message['id']
             )
+    elif text and text.lower().startswith("set alert "):
+        num = text.split(" ")[2]
+        user.alert_time = int(num)
+    elif text and text.lower().startswith("set reminder "):
+        num = text.split(" ")[2]
+        user.reminder_time = int(num)
     else:
         user.checkin()
 
@@ -77,43 +156,10 @@ def update_emoji(payload):
     event = payload.get("event", {})
     user_id = event.get("user")
     ts = event.get("event_ts")
+    teamID = payload['team_id']
+    token = db.get_token(teamID)
 
-    user = User(user_id)
-
-    if float(ts) < user.last_update:
-        return
-    else:
-        user.last_update = float(ts)
-
-    user.checkin()
-
-# Direct Message event_ts
-@slack_events_adapter.on("message.im")
-def im_message(payload):
-    """Process a direct message."""
-    print("Got a direct message event")
-    event = payload.get("event", {})
-    user_id = event.get("user")
-    ts = event.get("ts")
-    user = User(user_id)
-
-    if float(ts) < user.last_update:
-        return
-    else:
-        user.last_update = float(ts)
-
-    user.checkin()
-
-
-# Direct Message event_ts
-@slack_events_adapter.on("message.mpim")
-def mpim_message(payload):
-    """Process a direct message."""
-    print("Got a direct message event")
-    event = payload.get("event", {})
-    user_id = event.get("user")
-    ts = event.get("ts")
-    user = User(user_id)
+    user = User(user_id, token)
 
     if float(ts) < user.last_update:
         return
@@ -127,10 +173,12 @@ def mpim_message(payload):
 class User:
     """Defines a user class that will interface with the database backend."""
 
-    def __init__(self, user_id):
+    def __init__(self, user_id, token):
         """Initialize the user and make sure there is an entry in the database."""
         self.id = user_id
         self.find_dict = {'slack_id': user_id}
+        self.token = token
+        self.client = WebClient(token)
         user = db.users.find_one(self.find_dict)
         if user is None:
             db.add_user(self.id)
@@ -155,7 +203,7 @@ class User:
         if tz is not None:
             return pytz.timezone(tz)
         else:
-            response = slack_web_client.users_info(user=self.id)
+            response = self.client.users_info(user=self.id)
             if response['ok']:
                 new_tz = response['user']['tz']
                 self._set('tz', new_tz)
@@ -209,7 +257,7 @@ class User:
         if pms is not None:
             return pms
         else:
-            response = slack_web_client.conversations_open(users=[self.id])
+            response = self.client.conversations_open(users=[self.id])
             if response['ok']:
                 pms = response['channel']['id']
                 self._set('pms', pms)
@@ -245,7 +293,7 @@ class User:
     @property
     def name(self):
         """Query slack for the users name."""
-        response = slack_web_client.users_info(user=self.id)
+        response = self.client.users_info(user=self.id)
         if response['ok']:
             return response['user']['name']
         else:
@@ -268,16 +316,12 @@ class User:
     def start_checkins(self, channel_id):
         """Start checkins for the user in a given channel."""
         self.channel = channel_id
-        response = slack_web_client.chat_postMessage(
+        response = self.client.chat_postMessage(
             channel=channel_id,
             text=f"Welcome {self.name}! I'll start checking in on you now, stay safe!"
         )
         self.status_message = response['ts']
         self.checkin()
-        slack_web_client.pins_add(
-            channel=str(channel_id),
-            timestamp=str(self.status_message)
-        )
 
     def checkin(self):
         """Update that a user has been seen."""
@@ -287,20 +331,20 @@ class User:
         now = int(time.time())
         reminder_time = now + 60*self.reminder_time
         alert_time = now + 60*self.alert_time
-        response = slack_web_client.chat_scheduleMessage(
+        response = self.client.chat_scheduleMessage(
             channel=str(self.pms),
             text=f"Hey, you still there?",
             post_at=str(reminder_time)
         )
         self.reminder_message = response['scheduled_message_id']
-        response = slack_web_client.chat_scheduleMessage(
+        response = self.client.chat_scheduleMessage(
             channel=str(self.channel),
             text=f"Hey <!channel>, {self.name} didn't check-in, can someone call him?",
             post_at=str(alert_time)
         )
         self.alert_message = response['scheduled_message_id']
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
-        slack_web_client.chat_update(
+        self.client.chat_update(
             channel=str(self.channel),
             ts=str(self.status_message),
             text=f"Welcome {self.name}! I'll start checking in on you now, stay safe! Last checked in at: {checkin_time}"
@@ -310,7 +354,7 @@ class User:
         """Delete all the scheduled checkin messages for this user."""
         if self.reminder_message is not None:
             try:
-                slack_web_client.chat_deleteScheduledMessage(
+                self.client.chat_deleteScheduledMessage(
                     channel=str(self.pms),
                     scheduled_message_id=str(self.reminder_message)
                 )
@@ -319,7 +363,7 @@ class User:
             self.reminder_messgae = None
         if self.alert_message is not None:
             try:
-                slack_web_client.chat_deleteScheduledMessage(
+                self.client.chat_deleteScheduledMessage(
                     channel=str(self.channel),
                     scheduled_message_id=str(self.alert_message)
                 )
@@ -331,14 +375,10 @@ class User:
         """End the session for a user."""
         self.delete_scheduled()
         checkin_time = datetime.datetime.now(self.tz).strftime('%I:%M %p')
-        slack_web_client.chat_update(
+        self.client.chat_update(
             channel=str(self.channel),
             ts=str(self.status_message),
             text=f"{self.name.title()} checked out at: {checkin_time}"
-        )
-        slack_web_client.pins_remove(
-            channel=str(self.channel),
-            timestamp=str(self.status_message)
         )
         self.channel = None
         self.tz = None
