@@ -11,3 +11,9 @@
 3. After 30 minutes the bot will send a private message reminding you to check-in. Respond to this with either a message or emoji.
 4. 30 minutes after a missed reminder an alert message will be sent notifying everyone in the channel that a check-in was missed and to try to contact that user in person.
 5. To end a sessoin simply type ```stop```. This will change your status message to checked-out and remove reminder and alert messages.
+
+### User Settings
+
+  Settings can be managed using the ```set``` command followed by the setting name, then the desired value (e.g. ```set alert 60```). Currently available settings are:
+- alert: This defines how long, in minutes from the last check in, until everyone in the channel is mentioned in an alert (default: 60)
+- reminder: This defines how long, in minutes from the last check in, until the user is sent a reminder DM (default: 30)
