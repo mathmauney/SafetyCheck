@@ -3,9 +3,6 @@
 
 ## Installing SafetyCheck
 1. Add SafetyCheck to your workspace using the button above.
-2. Under Apps on your sidebar, click on Safety Check then the ... More button on the profile and select add to channel.
-3. Select the channel for monitoring in the dropdown
-4. Add users that will be notified when check-ins do not occur to this channel.
 
 ## Using SafetyCheck
 1. Start a check-in session by saying ```start``` in the channel the bot is installed in.
