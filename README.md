@@ -3,6 +3,7 @@
 
 ## Installing SafetyCheck
 1. Add SafetyCheck to your workspace using the button above.
+2. The bot will make a channel, add youself and any co-workers who should be notified to this channel.
 
 ## Using SafetyCheck
 1. Start a check-in session by saying ```start``` in the channel the bot is installed in.
