@@ -1,11 +1,8 @@
 # SafetyCheck
-<a href="https://slack.com/oauth/v2/authorize?client_id=164313058640.1058129049126&scope=channels:history,chat:write,groups:write,im:history,im:write,mpim:write,reactions:read,users:read,im:read"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x"></a>
+<a href="https://slack.amauney.com:444/begin_auth"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x"></a>
 
 ## Installing SafetyCheck
-1. Add SafetyCheck to your workspace using the button above. 
-2. Under Apps on your sidebar, click on Safety Check then the ... More button on the profile and select add to channel.
-3. Select the channel for monitoring in the dropdown
-4. Add users that will be notified when check-ins do not occur to this channel.
+1. Add SafetyCheck to your workspace using the button above.
 
 ## Using SafetyCheck
 1. Start a check-in session by saying ```start``` in the channel the bot is installed in.
