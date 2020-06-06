@@ -64,6 +64,7 @@ def post_install():
     # do a database lookup on each WebClient call
     global global_token
     global_token = response["access_token"]
+    print(f"Added token for {teamID}")
 
     # See if "the-welcome-channel" exists. Create it if it doesn't.
     channel_exists()
